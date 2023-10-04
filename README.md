@@ -43,7 +43,7 @@ Each subsequent POST request contains hidden field, whose value is cryptographic
 
 ## Requirements and limitations
 
-* CSRFence requires .NET Framework 4.5 and higher.
+* CSRFence requires .NET Framework 4.8.
 * Only ASP.NET Web Forms are protected. The module does not work for ASP.NET MVC or Web Pages, there are other ways for those.
 
 ## Contact author
