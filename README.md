@@ -22,7 +22,7 @@ In most cases, no configuration is necessary. CSRFence uses sensible defaults th
 		<section name="altairis.csrFence" type="Altairis.CsrFence.Configuration.CsrFenceSection, Altairis.CsrFence"/>
 	</configSections>
 	<altairis.csrFence>
-		<sessionId length="64" cookieName=".CSRFENCE" />
+		<sessionId length="64" cookieName=".CSRFENCE" cookieSameSite="" />
 		<token fieldName="__CSRFTOKEN" purposeString="Altairis.CsrFence.ProtectionModule.Token"/>
 	</altairis.csrFence>
 </configuration>
@@ -31,6 +31,7 @@ In most cases, no configuration is necessary. CSRFence uses sensible defaults th
 * `sessionId` - options for generating random session ID
 	* `length` - length of ID in bytes, defaults to 64 B (512 bits)
 	* `cookieName` - name of the session ID cookie, defauls to `.CSRFENCE`
+	* `cookieSameSite` - cookie's sameSite attribute. "_None_", "_Lax_" or "_Strict_". If the value is empty or invalid, the attribute will not be set.
 * `token` - options for the hidden field token 
 	* `fieldName` - hidden field name, defaults to `__CSRFTOKEN`
 	* `purposeString` - key derivation string used by `MachineKey.Protect` method

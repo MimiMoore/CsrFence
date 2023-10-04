@@ -6,14 +6,14 @@ namespace Altairis.CsrFence.Configuration {
 
         [ConfigurationProperty("fieldName", IsRequired = false, DefaultValue = "__CSRFTOKEN")]
         public string FieldName {
-            get { return (string)this["fieldName"]; }
-            set { this["fieldName"] = value; }
+            get => (string)this["fieldName"];
+            set => this["fieldName"] = value;
         }
 
         [ConfigurationProperty("purposeString", IsRequired = false, DefaultValue = "Altairis.CsrFence.ProtectionModule.Token")]
         public string PurposeString {
-            get { return (string)this["purposeString"]; }
-            set { this["purposeString"] = value; }
+            get => (string)this["purposeString"];
+            set => this["purposeString"] = value;
         }
     }
 }

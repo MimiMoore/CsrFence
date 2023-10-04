@@ -6,33 +6,36 @@ using System.Web;
 using System.Web.Security;
 using System.Web.UI;
 
-namespace Altairis.CsrFence {
+namespace Altairis.CsrFence
+{
 
-    public class ProtectionModule : IHttpModule {
+    public class ProtectionModule : IHttpModule
+    {
         private CsrFenceSection config;
 
-        public void Dispose() {
+        public void Dispose()
+        {
             // NOOP
         }
 
-        public void Init(HttpApplication context) {
+        public void Init(HttpApplication context)
+        {
             // Read configuration or use default
-            this.config = ConfigurationManager.GetSection("altairis.csrFence") as CsrFenceSection;
-            if (this.config == null) this.config = new CsrFenceSection();
+            this.config = ConfigurationManager.GetSection("altairis.csrFence") as CsrFenceSection ?? new CsrFenceSection();
 
             // Handle PostMapRequestHandler event
             context.PostMapRequestHandler += context_PostMapRequestHandler;
         }
 
-        private void context_PostMapRequestHandler(object sender, EventArgs e) {
+        private void context_PostMapRequestHandler(object sender, EventArgs e)
+        {
             var app = sender as HttpApplication;
-            var page = app.Context.Handler as Page;
-
-            if (page == null) return; // Handler is not Web Form
+            if (!(app?.Context.Handler is Page page)) return; // Handler is not Web Form
             page.Init += page_Init;
         }
 
-        void page_Init(object sender, EventArgs e) {
+        void page_Init(object sender, EventArgs e)
+        {
             var page = sender as Page;
 
             // Verify CSRF token on postback
@@ -42,8 +45,9 @@ namespace Altairis.CsrFence {
             CreateCsrfToken(page);
         }
 
-        private void CreateCsrfToken(Page page) {
-            if (page == null) throw new ArgumentNullException("page");
+        private void CreateCsrfToken(Page page)
+        {
+            if (page == null) throw new ArgumentNullException(nameof(page));
 
             // Create signed token
             var key = GetCsrfSessionIdFromCookie(true);
@@ -54,7 +58,18 @@ namespace Altairis.CsrFence {
             page.ClientScript.RegisterHiddenField(this.config.Token.FieldName, tokenString);
         }
 
-        private byte[] GetCsrfSessionIdFromCookie(bool createNew) {
+        private bool TryParseSameSiteModeFromString(string sameSiteString, out SameSiteMode mode)
+        {
+            mode = SameSiteMode.None;
+            if (string.IsNullOrEmpty(sameSiteString)) return false;
+            var parsed = Enum.TryParse(sameSiteString, true, out SameSiteMode parsedMode);
+            if (!parsed) return false;
+            mode = parsedMode;
+            return true;
+        }
+
+        private byte[] GetCsrfSessionIdFromCookie(bool createNew)
+        {
             // Get cookie with CSRF session ID
             var idCookie = HttpContext.Current.Request.Cookies[this.config.SessionId.CookieName];
             if (idCookie != null) {
@@ -77,8 +92,14 @@ namespace Altairis.CsrFence {
                 rng.GetBytes(buffer);
 
                 // Save to cookie
-                idCookie = new HttpCookie(this.config.SessionId.CookieName, Convert.ToBase64String(buffer));
-                idCookie.HttpOnly = true;
+                idCookie = new HttpCookie(this.config.SessionId.CookieName, Convert.ToBase64String(buffer)) {
+                    HttpOnly = true
+                };
+
+                // Add SameSite cookie attribute if configured
+                if (TryParseSameSiteModeFromString(this.config.SessionId.CookieSameSite, out var sameSiteMode))
+                    idCookie.SameSite = sameSiteMode;
+
                 HttpContext.Current.Response.Cookies.Add(idCookie);
 
                 // Return new key
@@ -86,8 +107,9 @@ namespace Altairis.CsrFence {
             }
         }
 
-        private bool VerifyCsrfToken(Page page) {
-            if (page == null) throw new ArgumentNullException("page");
+        private bool VerifyCsrfToken(Page page)
+        {
+            if (page == null) throw new ArgumentNullException(nameof(page));
 
             // Get session ID from cookie
             var key = GetCsrfSessionIdFromCookie(false);
@@ -109,6 +131,7 @@ namespace Altairis.CsrFence {
 
             // Compare key with supplied key
             if (key.Length != suppliedKey.Length) return false;
+
             for (int i = 0; i < key.Length; i++) {
                 if (!key[i].Equals(suppliedKey[i])) return false;
             }

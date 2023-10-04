@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
 namespace Altairis.CsrFence.Configuration {
 
@@ -11,14 +6,14 @@ namespace Altairis.CsrFence.Configuration {
 
         [ConfigurationProperty("sessionId")]
         public SessionIdElement SessionId {
-            get { return (SessionIdElement)this["sessionId"]; }
-            set { this["sessionId"] = value; }
+            get => (SessionIdElement)this["sessionId"];
+            set => this["sessionId"] = value;
         }
 
         [ConfigurationProperty("token")]
         public TokenElement Token {
-            get { return (TokenElement)this["token"]; }
-            set { this["token"] = value; }
+            get => (TokenElement)this["token"];
+            set => this["token"] = value;
         }
 
     }
